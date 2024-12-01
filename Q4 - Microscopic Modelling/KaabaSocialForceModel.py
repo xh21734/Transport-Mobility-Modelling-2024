@@ -14,12 +14,12 @@ def update_directions(pedestrians, boundaries, polygons):
         # THIS IS WHAT NEEDS TO BE CHANGED!!!
         destination_polygon_centroid = polygons[ped.destination]["nodes"].mean(axis=0)
         if ped.distance_covered < ped.r:
+            print(ped.r)
             v = normalise_vector(destination_polygon_centroid - ped.pos)
             tangv = [v[1],-v[0]]
             ped.desired_direction = normalise_vector(tangv)
         else:
-            tangv = [0,0]
-            ped.desired_direction = tangv
+            ped.desired_direction = normalise_vector(ped.vel)
     
 
 def process_interactions(pedestrians, boundaries, polygons):
@@ -33,8 +33,6 @@ def process_interactions(pedestrians, boundaries, polygons):
     for i, ped_i in pedestrians.items():
         if ped_i.distance_covered < ped_i.r:
             ped_i.acc = (ped_i.desired_walking_speed*ped_i.desired_direction - 3*ped_i.vel) * (1/tau)
-        elif ped_i.distance_covered >= ped_i.r:
-            ped_i.acc = (ped_i.desired_walking_speed*ped_i.desired_direction - 0.1*ped_i.vel) * (1/tau)
         # Pairwise forces from other pedestrians
         for j, ped_j in pedestrians.items():
             if i!=j:
@@ -92,7 +90,7 @@ world_definition = {
 world = World(world_definition)
 
 # Run simulation for 60 seconds
-for i in range(20000):
+for i in range(600):
     world.update(0.05)
-    if i == 100 or i==20000:
+    if i%20 == 0:
         world.render()
