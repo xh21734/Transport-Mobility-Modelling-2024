@@ -61,15 +61,16 @@ class Simulation:
             acc = (v_e - self.vehicles[i].v)/self.tau
 
             # Add traffic jam
-            if self.vehicles[i].x>=700 and self.vehicles[i].x<=710:
-                self.vehicles[i].v = 0 #min(5, self.vehicles[i].v)
+            if self.vehicles[i].x>=300 and self.vehicles[i].x<=350 and self.time<40.01:
+                self.vehicles[i].v = min(1, self.vehicles[i].v)
+            else:
+                self.vehicles[i].v += dt*acc
 
-            self.vehicles[i].v += dt*acc
             self.vehicles[i].x += dt*self.vehicles[i].v
 
             # Prevent crashes
-            if i<n-1 and self.vehicles[i].x > self.vehicles[i+1].x - 0.01:
-                self.vehicles[i].x = self.vehicles[i+1].x - 0.01
+            #if i<n-1 and self.vehicles[i].x > self.vehicles[i+1].x - 0.01:
+            #    self.vehicles[i].x = self.vehicles[i+1].x - 0.01
             
             # Add current position to trajectories
             self.trajectories["t"].append(self.time)
@@ -94,7 +95,13 @@ class Simulation:
         plt.title(str(round(100*self.time)/100.0) + " s")
         plt.show(block=False)
         plt.pause(0.001)
-        plt.savefig("OVM Traffic Light")
+        if round(100*self.time)/100.0 == 35.01:
+            print(str(round(100*self.time)/100.0))
+            plt.savefig("OVM Traffic Light Queue")
+        elif round(100*self.time)/100.0 == 42.01:
+            print(str(round(100*self.time)/100.0))
+            plt.savefig("OVM Traffic Shockwave")
+
 
 
 dt = 0.01

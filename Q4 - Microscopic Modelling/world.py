@@ -87,6 +87,7 @@ class Pedestrian:
         self.group_name = group_name
         self.desired_walking_speed = random.gauss(1.34, 0.37)
         self.distance_covered = distance_covered
+        self.r = vector_length(starting_position)*2*np.pi*7
         self.metadata = {}
         self.previous_polygon = source
         self.previous_polygon_timestamp = birth_time
@@ -290,6 +291,8 @@ class World:
         plt.show(block=False)
         #plt.pause(0.001)
         plt.pause(0.01)
+        if round(100*self.time)/100.0 == 4.05:
+            plt.savefig("Kaaba")
 
     def update(self, dt=0.05):
         self.update_desired_directions(self.pedestrians, self.boundaries, self.polygons)

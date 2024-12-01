@@ -13,19 +13,14 @@ def update_directions(pedestrians, boundaries, polygons):
     for i, ped in pedestrians.items():
         # THIS IS WHAT NEEDS TO BE CHANGED!!!
         destination_polygon_centroid = polygons[ped.destination]["nodes"].mean(axis=0)
-        r = vector_length(destination_polygon_centroid - ped.pos)
-        if ped.distance_covered < 7*np.pi*2*r:
+        if ped.distance_covered < ped.r:
             v = normalise_vector(destination_polygon_centroid - ped.pos)
-            #print(ped.vel)
             tangv = [v[1],-v[0]]
             ped.desired_direction = normalise_vector(tangv)
         else:
             tangv = [0,0]
-            ped.desired_direction = normalise_vector(tangv)
-        
-        #pos_b  = get_nearest_position(ped.pos, boundaries)
-        #tangent = normalise_vector(ped.pos - pos_b)
-        #ped.desired_direction = normalise_vector(destination_polygon_centroid - ped.pos)
+            ped.desired_direction = tangv
+    
 
 def process_interactions(pedestrians, boundaries, polygons):
     # Parameters
@@ -36,7 +31,10 @@ def process_interactions(pedestrians, boundaries, polygons):
     A_physical = 4
     Lambda = 0.2
     for i, ped_i in pedestrians.items():
-        ped_i.acc = (ped_i.desired_walking_speed*ped_i.desired_direction - ped_i.vel) * (1/tau)
+        if ped_i.distance_covered < ped_i.r:
+            ped_i.acc = (ped_i.desired_walking_speed*ped_i.desired_direction - 3*ped_i.vel) * (1/tau)
+        elif ped_i.distance_covered >= ped_i.r:
+            ped_i.acc = (ped_i.desired_walking_speed*ped_i.desired_direction - 0.1*ped_i.vel) * (1/tau)
         # Pairwise forces from other pedestrians
         for j, ped_j in pedestrians.items():
             if i!=j:
@@ -71,17 +69,18 @@ KaabaWidth = 4
 KaabaHeight = 4
 world_definition = {
     "space": {
-        "Mosque": {"type": "rectangle", "coordinates": [0, 0, MosqueWidth, MosqueHeight], "colour": "gray", "add_boundaries": True},
-        "Kaaba": {"type": "rectangle", "coordinates": [MosqueWidth/2-(KaabaWidth/2), MosqueHeight/2-(KaabaHeight/2), MosqueWidth/2+(KaabaWidth/2), MosqueHeight/2+(KaabaHeight/2)], "colour": "green", "add_boundaries": True},
+        "InnerMosque": {"type": "rectangle", "coordinates": [-MosqueWidth/4, -MosqueHeight/4, MosqueWidth/4, MosqueHeight/4], "colour": "gray", "add_boundaries": False},
+        "OuterMosque": {"type": "rectangle", "coordinates": [-MosqueWidth/2, -MosqueHeight/2, MosqueWidth/2, MosqueHeight/2], "colour": "gray", "add_boundaries": True},
+        "Kaaba": {"type": "rectangle", "coordinates": [-(KaabaWidth/2), -(KaabaHeight/2), (KaabaWidth/2), (KaabaHeight/2)], "colour": "green", "add_boundaries": True},
     },
     "pedestrians": {
-        "group1": {"source": "Mosque", "destination": "Kaaba", "colour": "red", "birth_rate": 20, "max_count": 20},
-        "group2": {"source": "Mosque", "destination": "Kaaba", "colour": "blue", "birth_rate": 20, "max_count": 20},
+        "group1": {"source": "InnerMosque", "destination": "Kaaba", "colour": "red", "birth_rate": 20, "max_count": 20},
+        "group2": {"source": "InnerMosque", "destination": "Kaaba", "colour": "blue", "birth_rate": 20, "max_count": 20},
     },
-    "boundaries": [[MosqueWidth/2-(KaabaWidth/2), MosqueHeight/2-(KaabaHeight/2), MosqueWidth/2+(KaabaWidth/2), MosqueHeight/2-(KaabaHeight/2)], 
-    [MosqueWidth/2-(KaabaWidth/2), MosqueHeight/2-(KaabaHeight/2), MosqueWidth/2-(KaabaWidth/2), MosqueHeight/2+(KaabaHeight/2)],
-    [MosqueWidth/2-(KaabaWidth/2), MosqueHeight/2+(KaabaHeight/2), MosqueWidth/2+(KaabaWidth/2), MosqueHeight/2+(KaabaHeight/2)],
-    [MosqueWidth/2+(KaabaWidth/2), MosqueHeight/2-(KaabaHeight/2), MosqueWidth/2+(KaabaWidth/2), MosqueHeight/2+(KaabaHeight/2)]],
+    "boundaries": [[-(KaabaWidth/2), -(KaabaHeight/2), +(KaabaWidth/2), -(KaabaHeight/2)], 
+    [-(KaabaWidth/2), -(KaabaHeight/2), -(KaabaWidth/2), +(KaabaHeight/2)],
+    [-(KaabaWidth/2), +(KaabaHeight/2), +(KaabaWidth/2), +(KaabaHeight/2)],
+    [+(KaabaWidth/2), -(KaabaHeight/2), +(KaabaWidth/2), +(KaabaHeight/2)]],
     #"periodic_boundaries": {"axis": "x", "pos1": 0, "pos2": 0},
     "functions": {
         "update_directions": update_directions,
@@ -93,8 +92,7 @@ world_definition = {
 world = World(world_definition)
 
 # Run simulation for 60 seconds
-for i in range(2400):
+for i in range(20000):
     world.update(0.05)
-    
-    if i%2==0:
+    if i == 100 or i==20000:
         world.render()
