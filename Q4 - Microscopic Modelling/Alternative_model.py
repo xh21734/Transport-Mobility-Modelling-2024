@@ -101,7 +101,7 @@ class Simulation:
         if round(100*self.time)/100.0 == 35.01:
             print(str(round(100*self.time)/100.0))
             plt.savefig("Alternate Traffic Light Queue")
-        elif round(100*self.time)/100.0 == 42.01:
+        elif round(100*self.time)/100.0 == 60.01:
             print(str(round(100*self.time)/100.0))
             plt.savefig("Alternate Traffic Shockwave")
 
