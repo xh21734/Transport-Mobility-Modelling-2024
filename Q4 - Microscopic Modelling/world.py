@@ -291,8 +291,12 @@ class World:
         plt.show(block=False)
         #plt.pause(0.001)
         plt.pause(0.01)
-        if round(100*self.time)/100.0 == 4.05:
-            plt.savefig("Kaaba")
+        if round(100*self.time)/100.0 == 10.05:
+            plt.savefig("Kaaba Situation 1 A")
+            #plt.savefig("Kaaba Situation 3 A")
+        if round(100*self.time)/100.0 == 20.05:
+            plt.savefig("Kaaba Situation 1 B")
+            #plt.savefig("Kaaba Situation 3 B")
 
     def update(self, dt=0.05):
         self.update_desired_directions(self.pedestrians, self.boundaries, self.polygons)
